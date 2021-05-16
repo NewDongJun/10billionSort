@@ -16,4 +16,6 @@ try:
             cnt += 1
 except Exception as e:
     print(e)
+finally:
+    f.close()
 print(temp[-1])
