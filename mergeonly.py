@@ -1,6 +1,8 @@
-import array
+from os import terminal_size
+import pickle
 import time
 import heapq
+import math
 
 sortedfilename = '10billion.sorted'
 datatype = 'i'
@@ -14,20 +16,13 @@ start = time.time()
 #성능 좋은 합치는 제너레이터 만들기
 def chunkread(filename):
     f = open(filename, 'rb')
-    data = array.array(datatype)
     try:
-        while True:
-            data  = array.array(datatype)
-            #이거는 원래 청크에서도 실험해 볼 필요가 있음
-            data.fromfile(f,arraysize)
-            for i in data:
-                yield i
-    except :
-        if len(data) >0:
-            for i in data:
-                yield i
-        else:
-            pass
+        for i in range(math.ceil(chunksize/arraysize)):
+            temp = pickle.load(f)
+            for num in temp:
+                yield num
+    except Exception as e:
+        pass
 
 
 #chunk들을 읽어올 객체 리스트 만들기
@@ -38,18 +33,18 @@ for i in range(1,chunkcnt):
 #chunk들 읽어 오면서 정렬하기
 f = open(sortedfilename, 'wb')
 merge_data = heapq.merge(*chunkReadList)
+cnt = 1
 try:
-    block = None
     while True:
-        block = array.array(datatype)
+        temp = []
         for i in range(arraysize):
-            block.append(next(merge_data))
-        block.tofile(f)
+            temp.append(next(merge_data))
+        pickle.dump(temp, f)
+        if cnt%1000000 == 0:
+            print(cnt)
+        cnt += 1
 except:
-    if len(block)>0:
-        block.tofile(f)
-    else:
-        pass
+    pass
 finally:
     f.close()
 

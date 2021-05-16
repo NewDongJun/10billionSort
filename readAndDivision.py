@@ -1,6 +1,7 @@
 import array
 import pickle
 import time
+import math
 
 filename = '10billion.int'
 sortedfilename = '10billion.sorted'
@@ -37,17 +38,15 @@ while True:
     #store 이 부분에서 데이터를 어레이로 묶어서 묶은 단위 만큼 저장
     chunk = open('chunk'+str(chunkcnt)+'.pickle','wb')
     try:
-        block = None
-        while True:
-            block = array.array(datatype)
-            for i in range(arraysize):
-                block.append(sortedData.pop(0))
-            block.tofile(chunk) #어레이 사이즈 만큼 읽어서 파일에 한번에 저장
+        slicestart = 0
+        for i in range(math.ceil(chunksize/arraysize)):
+            temp = sortedData[slicestart:slicestart + arraysize]
+            pickle.dump(temp, chunk)
+            slicestart += arraysize
+            #block.tofile(chunk) #어레이 사이즈 만큼 읽어서 파일에 한번에 저장
     except:
-        if len(block)>0: #남은데이터가 arraysize 보다 작은경우
-            block.tofile(chunk)
-        else:            #남은 데이터가 없는 경우
-            pass
+        temp = sortedData[slicestart:]
+        pickle.dump(temp, chunk)
     finally:
         chunk.close()
         print('store chunk'+str(chunkcnt)+':', time.time()-start)
